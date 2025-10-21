@@ -1,9 +1,17 @@
 import os
+import re
+import json
+import logging
+from typing import Dict, Any
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from app.prompt_templates import build_prompt
+from app.source_search import search_newsapi
 
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 MODEL_ID = os.getenv("MODEL_ID", "meta-llama/Llama-2-7b-instruct")
 DEVICE = os.getenv("DEVICE", "auto")
-
 
 
 

@@ -4,7 +4,7 @@ from typing import List
 
 
 NEWSAPI_KEY = os.getenv("NEWSAPI_KEY")
-BASE_URL = "https://newsapi.org/v2/everything"
+BASE_URL = "https://newsdata.io/api/1/news"
 
 
 
