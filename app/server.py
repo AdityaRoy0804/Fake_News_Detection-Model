@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-from .classifier import get_verifier
-from .utils import load_env
+from app.classifier import get_verifier
+from app.utils import load_env
 
 
 # load .env
@@ -31,3 +31,8 @@ async def classify_item(item: NewsItem):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+# Run the api
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app.server:app", host="127.0.0.1", port=8000, reload=True)
