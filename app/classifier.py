@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 # Environment variables
-MODEL_ID = os.getenv("MODEL_ID", "meta-llama/Llama-2-7b-instruct")
+MODEL_ID = os.getenv("MODEL_ID", "HuggingFaceH4/zephyr-7b-alpha")
 DEVICE = os.getenv("DEVICE", "auto")
-HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")  # Make sure this is set in your .env file
+HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")  
 
 if HF_TOKEN is None:
     raise ValueError("HUGGINGFACE_TOKEN not found. Please set it in your environment variables or .env file.")
