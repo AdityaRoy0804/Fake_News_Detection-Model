@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 # Environment variables
-MODEL_ID = os.getenv("MODEL_ID", "HuggingFaceH4/zephyr-7b-alpha")
+MODEL_ID = os.getenv("MODEL_ID", "meta-llama/Llama-2-7b-instruct")
 DEVICE = os.getenv("DEVICE", "auto")
 HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")  
 
@@ -32,7 +32,7 @@ class LlamaVerifier:
         logger.info(f"Loading model {self.model_id} on device={self.device} ...")
         
         # Load tokenizer & model with HF token for gated models
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_id, use_fast=True, use_auth_token=HF_TOKEN)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_id, use_fast=True, token=HF_TOKEN)
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_id,
             device_map="auto",
