@@ -5,48 +5,44 @@ import json
 import logging
 from typing import Dict, Any
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig
+from app.config import Config
 from app.prompt_templates import build_prompt
 from app.source_search import search_newsapi
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-# Environment variables
-MODEL_ID = os.getenv("MODEL_ID", "meta-llama/Llama-2-7b-chat-hf")
-DEVICE = os.getenv("DEVICE", "auto")
-HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")  # loaded from .env
-
 class LlamaVerifier:
-    def __init__(self, model_id: str = MODEL_ID, device: str = DEVICE, use_few_shot: bool = True):
-        self.model_id = model_id
-        self.device = device
+    def __init__(self, config: Config, use_few_shot: bool = True):
+        self.config = config
+        self.model_id = self.config.MODEL_ID
+        self.hf_token = self.config.HF_TOKEN
         self.use_few_shot = use_few_shot
         self._load_model()
 
+
     def _load_model(self):
-        logger.info(f"Loading model {self.model_id} on device={self.device} ...")
-        
-        if not HF_TOKEN:
-            logger.warning("HUGGINGFACE_TOKEN not found in .env. Trying to load model without explicit token.")
-            # The library will try to find a token from the CLI login cache.
+        logger.info(f"Loading model {self.model_id}...")
+        if not self.hf_token:
+            raise ValueError("Hugging Face token is missing. Cannot load model.")
         
         # For CPU, loading in 8-bit is highly recommended to save RAM and improve speed.
         # This requires the `bitsandbytes` library.
         quantization_config = BitsAndBytesConfig(load_in_8bit=True)
 
         self.tokenizer = AutoTokenizer.from_pretrained(
-            self.model_id, use_fast=True
+            self.model_id, use_fast=True, token=self.config.HF_TOKEN
         )
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_id,
             device_map="auto",
-            quantization_config=quantization_config
+            quantization_config=quantization_config,
+            token=self.config.HF_TOKEN
         )
         self.pipe = pipeline(
             "text-generation",
             model=self.model,
-            tokenizer=self.tokenizer,
-            device=0 if self.model.device.type == "cuda" else -1
+            tokenizer=self.tokenizer
         )
         logger.info("Model loaded successfully.")
 
@@ -68,7 +64,7 @@ class LlamaVerifier:
         parsed = self._post_process_json(out)
         if not parsed.get("sources"):
             try:
-                parsed["sources"] = search_newsapi(news_text, page_size=3)
+                parsed["sources"] = search_newsapi(news_text, api_key=self.config.NEWSAPI_KEY, page_size=3)
             except Exception:
                 pass
         return parsed
@@ -78,5 +74,7 @@ _verifier = None
 def get_verifier():
     global _verifier
     if _verifier is None:
-        _verifier = LlamaVerifier()
+        config = Config()
+        logger.info(f"Initializing verifier with token: {'Yes' if config.HF_TOKEN else 'No'}")
+        _verifier = LlamaVerifier(config=config)
     return _verifier

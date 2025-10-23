@@ -1,9 +1,6 @@
 from flask import Flask, request, jsonify
+# The config will be loaded automatically when the classifier is imported.
 from app.classifier import get_verifier
-from app.utils import load_env
-
-# Load .env file
-load_env()
 
 app = Flask(__name__)
 

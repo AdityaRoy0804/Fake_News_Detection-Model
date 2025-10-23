@@ -1,0 +1,15 @@
+# For the API server
+flask
+
+# For the ML model
+transformers>=4.30.0
+accelerate
+torch
+bitsandbytes
+
+# For the Streamlit UI
+streamlit
+
+# Utilities
+python-dotenv
+requests
