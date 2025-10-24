@@ -3,9 +3,10 @@ import os
 import re
 import json
 import logging
+from huggingface_hub.errors import HfHubHTTPError
 from typing import Dict, Any
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig
-from app.config import Config
+from app.config import app_config, Config
 from app.prompt_templates import build_prompt
 from app.source_search import search_newsapi
 
@@ -74,7 +75,8 @@ _verifier = None
 def get_verifier():
     global _verifier
     if _verifier is None:
-        config = Config()
-        logger.info(f"Initializing verifier with token: {'Yes' if config.HF_TOKEN else 'No'}")
-        _verifier = LlamaVerifier(config=config)
+        logger.info(f"Initializing verifier with token: {'Yes' if app_config.HF_TOKEN else 'No'}")
+        if app_config.HF_TOKEN:
+            logger.info(f"Token being used (partial): {app_config.HF_TOKEN[:8]}...{app_config.HF_TOKEN[-4:]}")
+        _verifier = LlamaVerifier(config=app_config)
     return _verifier
